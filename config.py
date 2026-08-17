@@ -20,6 +20,9 @@ JINA_BASE_URL = "https://r.jina.ai/"
 # 轮询
 CHECK_INTERVAL = int(os.getenv("CHECK_INTERVAL", "300"))
 
+# Web 服务端口（Koyeb 默认 8000）
+PORT = int(os.getenv("PORT", "8000"))
+
 # LLM 输入限制
 MAX_NEWS_BATCH = int(os.getenv("MAX_NEWS_BATCH", "20"))
 
