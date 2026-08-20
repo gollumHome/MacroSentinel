@@ -1,11 +1,10 @@
 """消息推送模块（企业微信）"""
-import re
 import asyncio
 import logging
 
 import httpx
 
-from config import WECOM_ENABLED, WECOM_WEBHOOK_URL, MAX_RETRIES, RETRY_BACKOFF, MAX_NEWS_BATCH
+from config import WECOM_ENABLED, WECOM_WEBHOOK_URL, MAX_RETRIES, RETRY_BACKOFF
 from models import NewsItem
 
 logger = logging.getLogger(__name__)
@@ -14,28 +13,9 @@ logger = logging.getLogger(__name__)
 WECOM_MAX_LENGTH = 2000  # 留点余量，官方限制 2048
 
 
-def _extract_cited_indices(analysis: str) -> set[int]:
-    """从 LLM 分析结果中提取被引用的新闻编号"""
-    matches = re.findall(r'[【\[](\d+)[】\]]', analysis)
-    return {int(m) for m in matches}
-
-
 def build_message(analysis: str, news_list: list[NewsItem]) -> str:
-    """组装最终推送消息：分析结果 + 仅被引用的原始链接"""
-    truncated = news_list[:MAX_NEWS_BATCH]
-
-    cited_indices = _extract_cited_indices(analysis)
-
-    if not cited_indices:
-        return analysis
-
-    links_section = "\n\n📎 相关原文链接：\n"
-    for idx in sorted(cited_indices):
-        if 1 <= idx <= len(truncated):
-            item = truncated[idx - 1]
-            links_section += f"[{idx}] {item.title}\n    🔗 {item.url}\n"
-
-    return f"{analysis}{links_section}"
+    """组装最终推送消息（仅分析内容，不附原文链接）"""
+    return analysis
 
 
 def _split_message(message: str, max_length: int = WECOM_MAX_LENGTH) -> list[str]:
